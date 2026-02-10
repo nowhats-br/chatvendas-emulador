@@ -105,6 +105,8 @@ class CloudAndroidManager {
   async createInstance(name, vncPort = 1, profile = 'med') {
     try {
       console.log(`🚀 Criando instância ${name} na nuvem...`);
+      console.log(`   URL: ${this.cloudApiUrl}/create`);
+      console.log(`   Payload: { name: "${name}", profile: "${profile}" }`);
       
       const response = await fetch(`${this.cloudApiUrl}/create`, {
         method: 'POST',
@@ -113,13 +115,18 @@ class CloudAndroidManager {
         timeout: 30000
       });
 
+      console.log(`   Status HTTP: ${response.status} ${response.statusText}`);
+
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error(`❌ Erro da API:`, errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
       
       console.log(`✅ Instância ${name} criada na nuvem`);
+      console.log(`   Resposta:`, JSON.stringify(data, null, 2));
       
       return {
         success: true,

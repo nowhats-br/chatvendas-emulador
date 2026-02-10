@@ -146,12 +146,8 @@ app.post('/create', async (req, res) => {
         RestartPolicy: { 
           Name: 'unless-stopped' 
         }
-      },
-      NetworkingConfig: {
-        EndpointsConfig: {
-          'android-network': {}
-        }
       }
+      // Removido NetworkingConfig - usar rede padrão
     });
     
     // Iniciar container
