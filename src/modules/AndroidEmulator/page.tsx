@@ -3,28 +3,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/ta
 import { AndroidEmulatorManager } from './components/AndroidEmulatorManager';
 import { EmulatorSettings } from './components/EmulatorSettings';
 import { EmulatorMonitor } from './components/EmulatorMonitor';
-import { WSL2SetupWizard } from './components/WSL2SetupWizard';
 
-const WSL2_API_BASE = 'http://127.0.0.1:3010/api/wsl2-android';
+const CLOUD_API_BASE = 'http://127.0.0.1:3010/api/android-cloud';
 
 export default function AndroidEmulatorPage() {
   const [activeTab, setActiveTab] = useState("manager");
-  const [wsl2Ready, setWsl2Ready] = useState(false);
+  const [cloudReady, setCloudReady] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkWSL2Status();
+    checkCloudStatus();
   }, []);
 
-  const checkWSL2Status = async () => {
+  const checkCloudStatus = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${WSL2_API_BASE}/setup/status`);
+      const response = await fetch(`${CLOUD_API_BASE}/setup/status`);
       const data = await response.json();
-      setWsl2Ready(data.ready);
+      
+      // Modo cloud sempre pronto se a API responder
+      setCloudReady(data.cloudMode && data.ready);
     } catch (error) {
-      console.error('Erro ao verificar status WSL2:', error);
-      setWsl2Ready(false);
+      console.error('Erro ao verificar status da nuvem:', error);
+      setCloudReady(false);
     } finally {
       setLoading(false);
     }
@@ -35,25 +36,51 @@ export default function AndroidEmulatorPage() {
       <div className="flex h-screen items-center justify-center bg-gray-50">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="text-gray-500 font-medium">Carregando ambiente Android (WSL2)...</p>
+          <p className="text-gray-500 font-medium">Conectando ao Android Cloud...</p>
         </div>
       </div>
     );
   }
 
-  // Se o WSL2 não estiver pronto, mostrar wizard obrigatoriamente
-  if (!wsl2Ready) {
-    return <WSL2SetupWizard onComplete={() => {
-      setWsl2Ready(true);
-    }} />;
+  // Se a API não estiver disponível, mostrar erro
+  if (!cloudReady) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50 p-6">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center space-y-6">
+          <div className="w-20 h-20 mx-auto bg-red-100 rounded-full flex items-center justify-center">
+            <span className="text-4xl">⚠️</span>
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">API Cloud Não Disponível</h2>
+            <p className="text-gray-600">
+              Não foi possível conectar à API Android na nuvem.
+            </p>
+          </div>
+          <div className="bg-gray-50 rounded-xl p-4 text-left space-y-2">
+            <p className="text-sm font-bold text-gray-700">Verifique:</p>
+            <ul className="text-sm text-gray-600 space-y-1">
+              <li>• Servidor na nuvem está rodando</li>
+              <li>• Porta 3011 está acessível</li>
+              <li>• CLOUD_ANDROID_API configurado no .env</li>
+            </ul>
+          </div>
+          <button
+            onClick={checkCloudStatus}
+            className="w-full py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition"
+          >
+            Tentar Novamente
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="p-6 space-y-6 max-h-screen overflow-y-auto bg-gray-50/30">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">🤖 Emulador Android Real</h1>
-          <p className="text-sm text-gray-500">Acesse WhatsApp e Play Store real via WSL2</p>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">☁️ Android Cloud</h1>
+          <p className="text-sm text-gray-500">Emuladores Android 13 rodando na nuvem</p>
         </div>
       </div>
 

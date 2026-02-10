@@ -24,13 +24,20 @@ import dashboardRoutes from './routes/dashboard.js';
 import financeRoutes from './routes/finance.js';
 import driversRoutes from './routes/drivers.js';
 import campaignRoutes from './routes/campaigns.js';
-import wsl2AndroidRoutes from './routes/wsl2Android.js';
 import wslRoutes from './routes/wsl-routes.mjs';
+import androidCloudRoutes from './routes/androidCloud.js';
 
 // Configuração
-dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Carregar .env do diretório backend (não da raiz do projeto)
+dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
+
+// Log de configuração importante
+console.log('🔧 Configuração Android Cloud:');
+console.log('   CLOUD_ANDROID_API:', process.env.CLOUD_ANDROID_API || 'NÃO CONFIGURADO');
+console.log('   Modo:', process.env.CLOUD_ANDROID_API ? 'NUVEM' : 'LOCAL');
 
 const app = express();
 const httpServer = createServer(app);
@@ -73,7 +80,8 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/finance', financeRoutes);
 app.use('/api/drivers', driversRoutes);
 app.use('/api/campaigns', campaignRoutes);
-app.use('/api/wsl2-android', wsl2AndroidRoutes);
+app.use('/api/android-cloud', androidCloudRoutes);
+app.use('/api/wsl2-android', androidCloudRoutes); // Manter compatibilidade com frontend
 app.use('/api/wsl', wslRoutes);
 
 // Servir página do instalador

@@ -1,0 +1,119 @@
+# Docker Compose COMPLETO - Backend + API + Emulador
+# Para deploy no Easypanel
+
+services:
+  # Backend ChatVendas
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    
+    ports:
+      - "3010:3010"
+    
+    environment:
+      NODE_ENV: production
+      PORT: 3010
+      DB_PATH: /app/data/chatvendas.db
+      JWT_SECRET: ${JWT_SECRET:-seu_jwt_secret_aqui}
+      WA_SESSION_PATH: /app/sessions
+      WA_PRINT_QR: "true"
+      UPLOAD_PATH: /app/uploads
+      MAX_FILE_SIZE: "10485760"
+      WS_PORT: "3010"
+      # IMPORTANTE: Usar nome do serviço Docker
+      CLOUD_ANDROID_API: http://android-api:3011
+    
+    volumes:
+      - backend-data:/app/data
+      - backend-sessions:/app/sessions
+      - backend-uploads:/app/uploads
+    
+    restart: unless-stopped
+    
+    networks:
+      - android-network
+    
+    depends_on:
+      - android-api
+    
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3010/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # API de Gerenciamento Android
+  android-api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    
+    ports:
+      - "3011:3011"
+    
+    environment:
+      NODE_ENV: production
+      PORT: 3011
+      DOMAIN: ${DOMAIN:-localhost}
+    
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    
+    restart: unless-stopped
+    
+    networks:
+      - android-network
+    
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3011/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Android Emulator 1 (Fixo)
+  android-1:
+    image: budtmo/docker-android:emulator_13.0
+    
+    privileged: true
+    
+    ports:
+      - "5900:5900"
+      - "6080:6080"
+      - "5555:5555"
+    
+    environment:
+      EMULATOR_DEVICE: "Samsung Galaxy S10"
+      EMULATOR_WIDTH: "720"
+      EMULATOR_HEIGHT: "1520"
+      WEB_VNC: "true"
+      VNC_PASSWORD: "chatvendas123"
+      EMULATOR_ARGS: "-gpu swiftshader_indirect -no-snapshot -noaudio -memory 4096"
+      TZ: "America/Sao_Paulo"
+    
+    volumes:
+      - android-1-data:/data
+    
+    restart: unless-stopped
+    
+    networks:
+      - android-network
+    
+    healthcheck:
+      test: ["CMD", "adb", "devices"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+volumes:
+  backend-data:
+  backend-sessions:
+  backend-uploads:
+  android-1-data:
+
+networks:
+  android-network:
+    driver: bridge
