@@ -11,6 +11,9 @@ class CloudAndroidManager {
     // URL da API na nuvem (configurável via .env)
     this.cloudApiUrl = process.env.CLOUD_ANDROID_API || 'http://localhost:3011';
     this.setupComplete = true; // Sempre pronto (nuvem já está configurada)
+    
+    console.log('🔧 CloudAndroidManager inicializado');
+    console.log('   URL da API:', this.cloudApiUrl);
   }
 
   /**
@@ -18,12 +21,22 @@ class CloudAndroidManager {
    */
   async isCloudAvailable() {
     try {
+      console.log(`🔍 Testando conexão com: ${this.cloudApiUrl}/health`);
+      
       const response = await fetch(`${this.cloudApiUrl}/health`, {
         timeout: 5000
       });
-      return response.ok;
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ API na nuvem respondeu:', data);
+        return true;
+      } else {
+        console.error(`❌ API retornou status ${response.status}`);
+        return false;
+      }
     } catch (error) {
-      console.error('❌ API na nuvem não disponível:', error.message);
+      console.error('❌ Erro ao conectar na API:', error.message);
       return false;
     }
   }

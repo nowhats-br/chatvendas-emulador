@@ -1,4 +1,18 @@
 const electron = require('electron');
+const dotenv = require('dotenv');
+const path = require('path');
+
+// Carregar .env ANTES de tudo
+const envPath = path.join(__dirname, '..', '.env');
+console.log('📁 Carregando .env de:', envPath);
+const envResult = dotenv.config({ path: envPath });
+
+if (envResult.error) {
+  console.warn('⚠️  Erro ao carregar .env:', envResult.error.message);
+} else {
+  console.log('✅ .env carregado com sucesso');
+  console.log('   CLOUD_ANDROID_API:', process.env.CLOUD_ANDROID_API || 'NÃO DEFINIDO');
+}
 
 // Check if we are in Electron or Node
 if (typeof electron === 'string') {
@@ -12,7 +26,6 @@ if (typeof electron === 'string') {
 }
 
 const { app, BrowserWindow, ipcMain, Menu, shell, dialog } = electron;
-const path = require('path');
 const { spawn } = require('child_process');
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -105,7 +118,9 @@ function startBackend() {
       env: {
         ...process.env,
         NODE_ENV: isDev ? 'development' : 'production',
-        PORT: '3010'
+        PORT: '3010',
+        // Garantir que CLOUD_ANDROID_API seja passado
+        CLOUD_ANDROID_API: process.env.CLOUD_ANDROID_API || 'http://localhost:3011'
       }
     });
 

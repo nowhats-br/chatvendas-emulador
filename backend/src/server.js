@@ -32,12 +32,23 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Carregar .env do diretório backend (não da raiz do projeto)
-dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
+const envPath = path.join(__dirname, '..', '..', '.env');
+console.log('📁 Carregando .env de:', envPath);
+
+const envResult = dotenv.config({ path: envPath });
+
+if (envResult.error) {
+  console.error('❌ Erro ao carregar .env:', envResult.error.message);
+} else {
+  console.log('✅ .env carregado com sucesso');
+}
 
 // Log de configuração importante
+console.log('');
 console.log('🔧 Configuração Android Cloud:');
-console.log('   CLOUD_ANDROID_API:', process.env.CLOUD_ANDROID_API || 'NÃO CONFIGURADO');
-console.log('   Modo:', process.env.CLOUD_ANDROID_API ? 'NUVEM' : 'LOCAL');
+console.log('   CLOUD_ANDROID_API:', process.env.CLOUD_ANDROID_API || '❌ NÃO CONFIGURADO');
+console.log('   Modo:', process.env.CLOUD_ANDROID_API ? '☁️  NUVEM' : '💻 LOCAL');
+console.log('');
 
 const app = express();
 const httpServer = createServer(app);
