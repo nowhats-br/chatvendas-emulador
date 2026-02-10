@@ -1,0 +1,14 @@
+{
+  "enabled": false,
+  "name": "Garantir Backend Ativo",
+  "description": "Verifica e inicia o backend automaticamente após cada resposta do agente",
+  "version": "1",
+  "when": {
+    "type": "agentStop"
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "powershell -Command \"$health = try { Invoke-WebRequest -Uri 'http://localhost:3010/api/health' -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop } catch { $null }; if (-not $health) { Write-Host 'Backend nao responde, reiniciando...'; $procs = Get-NetTCPConnection -LocalPort 3010 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique; foreach ($p in $procs) { Stop-Process -Id $p -Force -ErrorAction SilentlyContinue }; Start-Sleep 1; cd backend; Start-Process -NoNewWindow -FilePath 'npm' -ArgumentList 'start'; Write-Host 'Aguardando backend inicializar (10s)...'; Start-Sleep 10; $check = try { Invoke-WebRequest -Uri 'http://localhost:3010/api/health' -UseBasicParsing -TimeoutSec 3 } catch { $null }; if ($check) { Write-Host 'Backend ativo e respondendo!' } else { Write-Host 'Backend ainda carregando, pode demorar mais...' } } else { Write-Host 'Backend OK na porta 3010' }\"",
+    "timeout": 30
+  }
+}

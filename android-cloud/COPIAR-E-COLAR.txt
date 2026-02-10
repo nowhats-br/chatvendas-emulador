@@ -1,0 +1,208 @@
+═══════════════════════════════════════════════════════════════════
+  🚀 DEPLOY NO EASYPANEL - COPIAR E COLAR
+═══════════════════════════════════════════════════════════════════
+
+📋 VOCÊ VAI PRECISAR COPIAR 3 COISAS:
+
+1. Docker Compose (configuração principal)
+2. package.json (dependências da API)
+3. server.js (código da API)
+
+═══════════════════════════════════════════════════════════════════
+  📦 PASSO 1: COPIE O DOCKER COMPOSE
+═══════════════════════════════════════════════════════════════════
+
+Abra: android-cloud/docker-compose-easypanel.yml
+Copie TUDO (Ctrl+A, Ctrl+C)
+
+Ou copie daqui:
+
+---INÍCIO---
+services:
+  android-api:
+    image: node:20-alpine
+    container_name: android-api
+    working_dir: /app
+    command: sh -c "npm install && node server.js"
+    ports:
+      - "3011:3011"
+    environment:
+      NODE_ENV: production
+      PORT: 3011
+      DOMAIN: ${DOMAIN:-localhost}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./api:/app
+    restart: unless-stopped
+    networks:
+      - android-network
+
+  android-1:
+    image: budtmo/docker-android:emulator_13.0
+    container_name: android-emulator-1
+    privileged: true
+    ports:
+      - "5900:5900"
+      - "6080:6080"
+      - "5555:5555"
+    environment:
+      EMULATOR_DEVICE: "Samsung Galaxy S10"
+      EMULATOR_WIDTH: "720"
+      EMULATOR_HEIGHT: "1520"
+      WEB_VNC: "true"
+      VNC_PASSWORD: "chatvendas123"
+      EMULATOR_ARGS: "-gpu swiftshader_indirect -no-snapshot -noaudio -memory 4096"
+      TZ: "America/Sao_Paulo"
+    volumes:
+      - android-1-data:/data
+    restart: unless-stopped
+    networks:
+      - android-network
+
+volumes:
+  android-1-data:
+
+networks:
+  android-network:
+    driver: bridge
+---FIM---
+
+═══════════════════════════════════════════════════════════════════
+  📦 PASSO 2: COPIE O PACKAGE.JSON
+═══════════════════════════════════════════════════════════════════
+
+Abra: android-cloud/api/package.json
+Copie TUDO
+
+Ou copie daqui:
+
+---INÍCIO---
+{
+  "name": "android-cloud-api",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.18.2",
+    "dockerode": "^4.0.2",
+    "cors": "^2.8.5"
+  }
+}
+---FIM---
+
+═══════════════════════════════════════════════════════════════════
+  📦 PASSO 3: COPIE O SERVER.JS
+═══════════════════════════════════════════════════════════════════
+
+Abra: android-cloud/api/server.js
+Copie TUDO (é grande, ~200 linhas)
+
+═══════════════════════════════════════════════════════════════════
+  🖥️ AGORA NO EASYPANEL
+═══════════════════════════════════════════════════════════════════
+
+1. Acesse: https://seu-servidor.easypanel.io
+2. Login
+3. Clique em "New Project"
+4. Nome: android-cloud
+5. Clique em "Create"
+
+═══════════════════════════════════════════════════════════════════
+  🐳 ADICIONAR DOCKER COMPOSE
+═══════════════════════════════════════════════════════════════════
+
+1. Clique em "Add Service"
+2. Selecione "Docker Compose"
+3. COLE o conteúdo do PASSO 1 (docker-compose.yml)
+4. Clique em "Create"
+
+═══════════════════════════════════════════════════════════════════
+  📁 CRIAR ARQUIVOS DA API
+═══════════════════════════════════════════════════════════════════
+
+Método 1: Via Interface Easypanel
+
+1. No projeto, procure "Files" ou "File Manager"
+2. Crie pasta: api/
+3. Dentro de api/, crie arquivo: package.json
+4. COLE o conteúdo do PASSO 2
+5. Salve
+6. Crie arquivo: server.js
+7. COLE o conteúdo do PASSO 3
+8. Salve
+
+Método 2: Via SSH
+
+ssh root@seu-servidor.com
+mkdir -p /opt/android-cloud/api
+cd /opt/android-cloud/api
+nano package.json  # Cole e salve (Ctrl+X, Y, Enter)
+nano server.js     # Cole e salve (Ctrl+X, Y, Enter)
+
+═══════════════════════════════════════════════════════════════════
+  ⚙️ CONFIGURAR VARIÁVEIS
+═══════════════════════════════════════════════════════════════════
+
+1. No Easypanel, vá em "Environment"
+2. Adicione:
+   Nome: DOMAIN
+   Valor: seu-dominio.com (ou IP do servidor)
+3. Salve
+
+═══════════════════════════════════════════════════════════════════
+  🚀 DEPLOY
+═══════════════════════════════════════════════════════════════════
+
+1. Clique em "Deploy" (botão verde)
+2. Aguarde 2-3 minutos
+3. Veja os logs
+
+═══════════════════════════════════════════════════════════════════
+  ✅ TESTAR
+═══════════════════════════════════════════════════════════════════
+
+Abra no navegador:
+
+http://seu-servidor:3011/health
+
+Deve retornar:
+{"status":"ok","mode":"cloud"}
+
+Se aparecer isso, FUNCIONOU! ✅
+
+═══════════════════════════════════════════════════════════════════
+  🔧 CONFIGURAR NO CHATVENDAS
+═══════════════════════════════════════════════════════════════════
+
+No seu PC:
+
+1. Abra: backend/.env
+2. Adicione:
+   CLOUD_ANDROID_API=http://seu-servidor:3011
+3. Salve
+4. Reinicie: npm run electron:dev
+
+═══════════════════════════════════════════════════════════════════
+  🎉 PRONTO!
+═══════════════════════════════════════════════════════════════════
+
+Agora você pode:
+1. Abrir ChatVendas
+2. Ir em "Android Emulator"
+3. Clicar em "Criar Instância"
+4. Android aparece no frame!
+
+═══════════════════════════════════════════════════════════════════
+  📞 DÚVIDAS?
+═══════════════════════════════════════════════════════════════════
+
+Ver logs:
+docker logs android-api
+
+Ver containers:
+docker ps
+
+Reiniciar:
+docker restart android-api
+
+═══════════════════════════════════════════════════════════════════

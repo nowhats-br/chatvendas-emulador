@@ -1,0 +1,45 @@
+correções a fazer
+
+
+
+1 Numero na lista negra continua recebendo   ok
+
+2 no modo campanha o sistema não identifica resposta de botões, na verdade o sistema não reconhece resposta de botões
+ 
+3 Sistema não cria campanha agendada, clica em enviar ele mostra a lista de campanhas vazia sem a campanha em progresso
+
+4 no modal de registro quando o usuário tenta acessar com qualquer número que não tenha licença abre o campo pedindo os dados e a licença, ali tem que ter o campo de WhatsApp esse número será vinculado a licença e será usado para o acesso
+
+5 Erro ao salvar a chave api chatgpt e gemini, não salva !
+
+
+
+Esses valores foi oque ficou faltando tá isso é só para informação
+
+Gesso falta R$ 1.875,00
+Espaçadores R$ 150,00
+Frete argamassa R$80,00
+Diárias ajudante entulho R$ 140,00
+Revestimento churrasqueira + frete R$ 1.265,11
+
+
+piso restante R$12.533,00
+
+
+
+Total R$ 4.970,11
+Danilo falta pagar R$ 250,00
+
+
+quando mudar para fallback eu quero menu bem organizado assim
+
+1- vendas
+2- suporte
+3- Atendente
+
+não precisa usar emojis igual no botão
+
+seria bom na aba de configuração do nodes tem a opção de criar o menu com texto, seria os mesmos campos de onde coloca o nome dos botões mas ali gera texto
+
+
+

@@ -1,0 +1,68 @@
+# Docker Compose Otimizado para Easypanel
+# Sem warnings de conflitos
+
+services:
+  # API de Gerenciamento
+  android-api:
+    image: node:20-alpine
+    working_dir: /app
+    
+    command: sh -c "npm install && node server.js"
+    
+    ports:
+      - "3011:3011"
+    
+    environment:
+      NODE_ENV: production
+      PORT: 3011
+      DOMAIN: ${DOMAIN:-localhost}
+    
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./api:/app
+    
+    restart: unless-stopped
+    
+    networks:
+      - android-network
+
+  # Android Emulator 1
+  android-1:
+    image: budtmo/docker-android:emulator_13.0
+    
+    privileged: true
+    
+    ports:
+      - "5900:5900"
+      - "6080:6080"
+      - "5555:5555"
+    
+    environment:
+      EMULATOR_DEVICE: "Samsung Galaxy S10"
+      EMULATOR_WIDTH: "720"
+      EMULATOR_HEIGHT: "1520"
+      WEB_VNC: "true"
+      VNC_PASSWORD: "chatvendas123"
+      EMULATOR_ARGS: "-gpu swiftshader_indirect -no-snapshot -noaudio -memory 4096"
+      TZ: "America/Sao_Paulo"
+    
+    volumes:
+      - android-1-data:/data
+    
+    restart: unless-stopped
+    
+    networks:
+      - android-network
+    
+    healthcheck:
+      test: ["CMD", "adb", "devices"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  android-1-data:
+
+networks:
+  android-network:
+    driver: bridge

@@ -1,0 +1,155 @@
+# ═══════════════════════════════════════════════════════════════════
+# Docker Compose para Easypanel - Usando GitHub
+# ═══════════════════════════════════════════════════════════════════
+# 
+# Este arquivo usa o repositório do ChatVendas no GitHub
+# Não precisa criar um repositório separado!
+#
+# ⚠️ IMPORTANTE: Troque "SEU-USUARIO/chatvendas" pelo seu repositório
+#
+# Exemplo:
+#   Se seu repo é: https://github.com/joao/meu-chatvendas
+#   Troque para: https://github.com/joao/meu-chatvendas.git#main:android-cloud/api
+#
+# ═══════════════════════════════════════════════════════════════════
+
+services:
+  # API de Gerenciamento
+  android-api:
+    # Build direto do GitHub (subpasta android-cloud/api)
+    build:
+      context: https://github.com/SEU-USUARIO/chatvendas.git#main:android-cloud/api
+      dockerfile: Dockerfile
+    
+    ports:
+      - "3011:3011"
+    
+    environment:
+      NODE_ENV: production
+      PORT: 3011
+      DOMAIN: ${DOMAIN:-localhost}
+    
+    volumes:
+      # Acesso ao Docker do host (para criar containers)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    
+    restart: unless-stopped
+    
+    networks:
+      - android-network
+
+  # Android Emulator 1 (Exemplo inicial)
+  android-1:
+    image: budtmo/docker-android:emulator_13.0
+    
+    privileged: true
+    
+    ports:
+      - "5900:5900"   # VNC
+      - "6080:6080"   # noVNC WebSocket
+      - "5555:5555"   # ADB
+    
+    environment:
+      # Dispositivo
+      EMULATOR_DEVICE: "Samsung Galaxy S10"
+      
+      # Resolução (formato celular)
+      EMULATOR_WIDTH: "720"
+      EMULATOR_HEIGHT: "1520"
+      
+      # VNC
+      WEB_VNC: "true"
+      VNC_PASSWORD: "chatvendas123"
+      
+      # Performance
+      EMULATOR_ARGS: "-gpu swiftshader_indirect -no-snapshot -noaudio -memory 4096"
+      
+      # Timezone
+      TZ: "America/Sao_Paulo"
+    
+    volumes:
+      - android-1-data:/data
+    
+    restart: unless-stopped
+    
+    networks:
+      - android-network
+    
+    healthcheck:
+      test: ["CMD", "adb", "devices"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  android-1-data:
+
+networks:
+  android-network:
+    driver: bridge
+
+# ═══════════════════════════════════════════════════════════════════
+# 📋 INSTRUÇÕES DE USO:
+# ═══════════════════════════════════════════════════════════════════
+#
+# 1️⃣ TROQUE na linha 23:
+#    https://github.com/SEU-USUARIO/chatvendas.git#main:android-cloud/api
+#                      └─────┬─────┘ └──┬──┘ └─┬─┘ └──────┬──────┘
+#                            │          │      │          │
+#                       seu usuario   repo  branch    subpasta
+#
+#    Exemplos:
+#    - https://github.com/joao/chatvendas.git#main:android-cloud/api
+#    - https://github.com/maria/whatsapp-bot.git#master:android-cloud/api
+#
+# 2️⃣ Se seu branch é "master" em vez de "main", troque:
+#    ...chatvendas.git#master:android-cloud/api
+#
+# 3️⃣ No Easypanel:
+#    a) New Project → android-cloud
+#    b) Add Service → Docker Compose
+#    c) Cole este arquivo (com suas modificações)
+#    d) Environment → Adicione: DOMAIN=seu-dominio.com
+#    e) Deploy!
+#
+# 4️⃣ Aguarde 2-3 minutos (vai baixar imagens)
+#
+# 5️⃣ Teste:
+#    http://seu-servidor:3011/health
+#    
+#    Deve retornar:
+#    {"status":"ok","mode":"cloud"}
+#
+# 6️⃣ Configure no ChatVendas (backend/.env):
+#    CLOUD_ANDROID_API=http://seu-servidor:3011
+#
+# 7️⃣ Reinicie o backend:
+#    npm run electron:dev
+#
+# 8️⃣ Teste no ChatVendas:
+#    - Abra Android Emulator
+#    - Clique em "Criar Instância"
+#    - Android aparece no frame!
+#
+# ═══════════════════════════════════════════════════════════════════
+# 🐛 PROBLEMAS COMUNS:
+# ═══════════════════════════════════════════════════════════════════
+#
+# ❌ "repository not found"
+#    → Verifique se o repositório é público
+#    → Ou configure SSH key no Easypanel
+#
+# ❌ "context not found"
+#    → Verifique se a pasta android-cloud/ existe no repo
+#    → Verifique o nome do branch (main ou master)
+#
+# ❌ "Cannot connect to Docker daemon"
+#    → ssh root@servidor
+#    → systemctl start docker
+#
+# ❌ "Port already in use"
+#    → Mude as portas:
+#      ports:
+#        - "3012:3011"  # Mude 3011 para 3012
+#
+# ═══════════════════════════════════════════════════════════════════
