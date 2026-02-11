@@ -1,12 +1,9 @@
 FROM node:20-alpine
 
-# Instalar wget para healthcheck
-RUN apk add --no-cache wget
-
 WORKDIR /app
 
 # Copiar package.json
-COPY package*.json ./
+COPY package.json ./
 
 # Instalar dependências
 RUN npm install --production
@@ -17,5 +14,5 @@ COPY . .
 # Expor porta
 EXPOSE 3011
 
-# Iniciar
+# Comando para iniciar
 CMD ["node", "server.js"]
