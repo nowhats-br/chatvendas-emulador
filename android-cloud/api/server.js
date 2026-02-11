@@ -281,6 +281,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log('═══════════════════════════════════════════════════════');
   console.log(`✅ Servidor rodando em: http://0.0.0.0:${PORT}`);
   console.log(`🌐 Domínio configurado: ${DOMAIN}`);
+  console.log(`🔍 DOMAIN env var: ${process.env.DOMAIN || 'NÃO DEFINIDO'}`);
   console.log(`📊 Health check: http://0.0.0.0:${PORT}/health`);
   console.log('═══════════════════════════════════════════════════════');
 });
