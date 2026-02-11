@@ -18,20 +18,46 @@ export function VNCViewer({ instance }: VNCViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // A porta do WebSocket Proxy no QEMU nativo é wsPort (6080+N) e o host é o IP do WSL
-  const wsPort = (instance as any).wsPort || (instance.network.vncPort + 180);
-  // DEFINITIVE FIX: Use localhost (127.0.0.1) instead of WSL IP for the WebSocket connection.
-  // WSL2 maps any port listening on 0.0.0.0 in Linux to 127.0.0.1 on Windows.
-  // Using the WSL IP is unstable and often fails with code 1006.
-  const host = '127.0.0.1';
-  const vncUrl = `http://127.0.0.1:3010/vnc/index.html?host=${host}&port=${wsPort}&autoconnect=true&encrypt=false&resize=scale&quality=6&compression=2`;
-
-  console.log(`🖥️ VNC Viewer configurado:`, {
-    instanceId: instance.id,
-    vncPort: instance.network.vncPort,
-    wsPort: wsPort,
-    vncUrl: vncUrl
-  });
+  // ☁️ CLOUD MODE: Usar vncUrl da API se disponível (modo cloud)
+  // Caso contrário, usar localhost (modo local/WSL2)
+  const cloudVncUrl = (instance as any).vncUrl;
+  
+  let vncUrl: string;
+  
+  if (cloudVncUrl) {
+    // Modo Cloud: Usar proxy WebSocket do backend
+    // Formato original: wss://167.86.72.198:6081/websockify
+    const wsUrl = cloudVncUrl.replace('wss://', '').replace('ws://', '');
+    const [hostPort] = wsUrl.split('/');
+    const [host, port] = hostPort.split(':');
+    
+    // Conectar via proxy do backend
+    // O noVNC vai conectar em ws://127.0.0.1:3010/vnc-proxy/167.86.72.198:6081
+    // Usando o parâmetro 'path' do noVNC
+    const proxyPath = `vnc-proxy/${host}:${port}`;
+    vncUrl = `http://127.0.0.1:3010/vnc/index.html?host=127.0.0.1&port=3010&path=${proxyPath}&autoconnect=true&encrypt=false&resize=scale&quality=6&compression=2`;
+    
+    console.log(`☁️ VNC Cloud Mode (via proxy):`, {
+      instanceId: instance.id,
+      cloudVncUrl: cloudVncUrl,
+      targetHost: host,
+      targetPort: port,
+      proxyPath: proxyPath,
+      vncUrl: vncUrl
+    });
+  } else {
+    // Modo Local/WSL2: Usar localhost
+    const wsPort = (instance as any).wsPort || (instance.network.vncPort + 180);
+    const host = '127.0.0.1';
+    vncUrl = `http://127.0.0.1:3010/vnc/index.html?host=${host}&port=${wsPort}&autoconnect=true&encrypt=false&resize=scale&quality=6&compression=2`;
+    
+    console.log(`💻 VNC Local Mode:`, {
+      instanceId: instance.id,
+      vncPort: instance.network.vncPort,
+      wsPort: wsPort,
+      vncUrl: vncUrl
+    });
+  }
 
   useEffect(() => {
     // Otimizar canvas se existir

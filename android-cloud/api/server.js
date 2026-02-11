@@ -5,7 +5,7 @@ import cors from 'cors';
 const app = express();
 const docker = new Docker();
 const PORT = process.env.PORT || 3011;
-const DOMAIN = process.env.DOMAIN || 'localhost';
+const DOMAIN = process.env.DOMAIN || '167.86.72.198'; // IP do servidor cloud
 
 app.use(cors());
 app.use(express.json());

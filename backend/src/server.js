@@ -26,6 +26,7 @@ import driversRoutes from './routes/drivers.js';
 import campaignRoutes from './routes/campaigns.js';
 import wslRoutes from './routes/wsl-routes.mjs';
 import androidCloudRoutes from './routes/androidCloud.js';
+import { setupVNCProxy } from './routes/vncProxy.js';
 
 // Configuração
 const __filename = fileURLToPath(import.meta.url);
@@ -69,6 +70,9 @@ app.use('/vnc', express.static(path.join(__dirname, 'public', 'vnc')));
 // Inicializar WebSocket e WhatsApp Managers
 const wsManager = new WebSocketManager(wss);
 const waManager = new BaseWhatsAppManager(wsManager);
+
+// Configurar proxy VNC para conexões cloud
+setupVNCProxy(wss, httpServer);
 
 // Injetar managers nas requisições
 app.use((req, res, next) => {
