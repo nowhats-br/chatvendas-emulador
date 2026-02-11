@@ -15,7 +15,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3011
-      DOMAIN: ${DOMAIN:-localhost}
+      DOMAIN: 167.86.72.198
     
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
