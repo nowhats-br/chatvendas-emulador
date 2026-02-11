@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  android-api:
+    image: node:20-alpine
+    container_name: android-cloud-api
+    working_dir: /app
+    
+    command: sh -c "npm install && node server.js"
+    
+    ports:
+      - "3011:3011"
+    
+    environment:
+      NODE_ENV: production
+      PORT: 3011
+      DOMAIN: 167.86.72.198
+    
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./api:/app
+    
+    restart: unless-stopped
+    
+    networks:
+      - android-network
+
+networks:
+  android-network:
+    driver: bridge
