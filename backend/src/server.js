@@ -32,8 +32,8 @@ import { setupVNCProxy } from './routes/vncProxy.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Carregar .env do diretório backend (não da raiz do projeto)
-const envPath = path.join(__dirname, '..', '..', '.env');
+// Carregar .env do diretório backend
+const envPath = path.join(__dirname, '..', '.env');
 console.log('📁 Carregando .env de:', envPath);
 
 const envResult = dotenv.config({ path: envPath });

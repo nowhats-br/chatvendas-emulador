@@ -1,0 +1,218 @@
+═══════════════════════════════════════════════════════════════
+🚀 COMANDOS RÁPIDOS - Android Cloud API
+═══════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📦 INSTALAÇÃO COMPLETA (Executar no servidor via SSH)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ssh root@167.86.72.198
+cd /root/chatvendas-emulador/android-cloud
+chmod +x install-portainer.sh
+./install-portainer.sh
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🐳 DEPLOY DIRETO (Sem Portainer UI)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+docker run -d \
+  --name android-cloud-api \
+  --restart unless-stopped \
+  -p 3011:3011 \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -v /root/chatvendas-emulador/android-cloud/api:/app \
+  -w /app \
+  -e NODE_ENV=production \
+  -e PORT=3011 \
+  -e DOMAIN=167.86.72.198 \
+  node:20-alpine \
+  sh -c 'npm install && node server.js'
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📥 BAIXAR IMAGEM DO ANDROID (OBRIGATÓRIO!)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+docker pull budtmo/docker-android:emulator_13.0
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧪 TESTAR API
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+curl http://167.86.72.198:3011/health
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 VERIFICAR STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Ver containers rodando
+docker ps
+
+# Ver API
+docker ps | grep android-cloud-api
+
+# Ver emuladores
+docker ps | grep android-emulator
+
+# Ver Portainer
+docker ps | grep portainer
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 VER LOGS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Logs da API (tempo real)
+docker logs -f android-cloud-api
+
+# Últimas 50 linhas
+docker logs --tail 50 android-cloud-api
+
+# Logs de um emulador
+docker logs -f android-emulator-device1
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔄 REINICIAR/PARAR/INICIAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Reiniciar API
+docker restart android-cloud-api
+
+# Parar API
+docker stop android-cloud-api
+
+# Iniciar API
+docker start android-cloud-api
+
+# Remover API (para recriar)
+docker stop android-cloud-api
+docker rm android-cloud-api
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🗑️ LIMPAR EMULADORES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Parar todos os emuladores
+docker stop $(docker ps -q --filter "name=android-emulator")
+
+# Remover todos os emuladores parados
+docker rm $(docker ps -aq --filter "name=android-emulator" --filter "status=exited")
+
+# Parar e remover TODOS os emuladores
+docker stop $(docker ps -q --filter "name=android-emulator")
+docker rm $(docker ps -aq --filter "name=android-emulator")
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 MONITORAMENTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Ver uso de recursos (CPU/RAM) em tempo real
+docker stats
+
+# Ver uso de disco
+df -h
+
+# Ver imagens baixadas
+docker images
+
+# Ver espaço usado pelo Docker
+docker system df
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔧 PORTAINER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Instalar Portainer
+docker volume create portainer_data
+docker run -d \
+  -p 9000:9000 \
+  -p 9443:9443 \
+  --name portainer \
+  --restart=always \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v portainer_data:/data \
+  portainer/portainer-ce:latest
+
+# Acessar Portainer
+http://167.86.72.198:9000
+
+# Reiniciar Portainer
+docker restart portainer
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧹 LIMPEZA GERAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Remover containers parados
+docker container prune -f
+
+# Remover imagens não usadas
+docker image prune -a -f
+
+# Remover volumes não usados
+docker volume prune -f
+
+# Limpeza completa (CUIDADO!)
+docker system prune -a --volumes -f
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔍 DEBUG
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Entrar no container da API
+docker exec -it android-cloud-api sh
+
+# Ver variáveis de ambiente
+docker exec android-cloud-api env
+
+# Testar conectividade
+docker exec android-cloud-api wget -O- http://localhost:3011/health
+
+# Ver processos dentro do container
+docker exec android-cloud-api ps aux
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🌐 URLS IMPORTANTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Portainer:     http://167.86.72.198:9000
+API Health:    http://167.86.72.198:3011/health
+API Instances: http://167.86.72.198:3011/instances
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💻 NO WINDOWS (ChatVendas)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Iniciar em modo dev
+npm run electron:dev
+
+# Build para produção
+npm run electron:build
+
+
+═══════════════════════════════════════════════════════════════
+✅ WORKFLOW COMPLETO
+═══════════════════════════════════════════════════════════════
+
+1. SSH no servidor
+2. Executar: ./install-portainer.sh
+3. Aguardar download da imagem (~5-10 min)
+4. Acessar Portainer: http://167.86.72.198:9000
+5. Criar stack com portainer-stack.yml
+6. Testar: curl http://167.86.72.198:3011/health
+7. Abrir ChatVendas: npm run electron:dev
+8. Criar device Android
+9. Pronto! 🎉
+
+═══════════════════════════════════════════════════════════════
