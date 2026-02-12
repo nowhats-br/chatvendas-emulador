@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   android-api:
     image: node:20-alpine
@@ -21,19 +19,3 @@ services:
       - ./api:/app
     
     restart: unless-stopped
-    
-    labels:
-      - "easypanel.managed=true"
-      - "easypanel.project=android"
-      - "easypanel.service=android-cloud"
-      - "easypanel.source.type=git"
-      - "easypanel.source.repository=https://github.com/nowhats-br/chatvendas-emulador.git"
-      - "easypanel.source.branch=main"
-      - "easypanel.source.path=android-cloud"
-    
-    networks:
-      - android-network
-
-networks:
-  android-network:
-    driver: bridge
